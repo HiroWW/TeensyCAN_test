@@ -5,6 +5,20 @@ FlexCAN_T4FD<CAN3, RX_SIZE_256, TX_SIZE_256> FD;
 
 TeensyCAN node100 = TeensyCAN(100);
 
+void canSniff(const CANFD_message_t &msg) {
+  Serial.print("ISR - MB "); Serial.print(msg.mb);
+  Serial.print("  OVERRUN: "); Serial.print(msg.flags.overrun);
+  Serial.print("  LEN: "); Serial.print(msg.len);
+  Serial.print(" EXT: "); Serial.print(msg.flags.extended);
+  Serial.print("  EDL: "); Serial.print(msg.edl );
+  Serial.print(" TS: "); Serial.print(msg.timestamp);
+  Serial.print(" ID: "); Serial.print(msg.id, HEX);
+  Serial.print(" Buffer: ");
+  for ( uint8_t i = 0; i < msg.len; i++ ) {
+    Serial.print(msg.buf[i], HEX); Serial.print(" ");
+  } Serial.println();
+}
+
 void setup() {
   Serial.begin(115200); delay(400);
   pinMode(6, OUTPUT); digitalWrite(6, LOW); /* enable transceiver */
@@ -48,16 +62,3 @@ void loop() {
   }
 }
 
-void canSniff(const CANFD_message_t &msg) {
-  Serial.print("ISR - MB "); Serial.print(msg.mb);
-  Serial.print("  OVERRUN: "); Serial.print(msg.flags.overrun);
-  Serial.print("  LEN: "); Serial.print(msg.len);
-  Serial.print(" EXT: "); Serial.print(msg.flags.extended);
-  Serial.print("  EDL: "); Serial.print(msg.edl );
-  Serial.print(" TS: "); Serial.print(msg.timestamp);
-  Serial.print(" ID: "); Serial.print(msg.id, HEX);
-  Serial.print(" Buffer: ");
-  for ( uint8_t i = 0; i < msg.len; i++ ) {
-    Serial.print(msg.buf[i], HEX); Serial.print(" ");
-  } Serial.println();
-}

@@ -5,6 +5,34 @@ FlexCAN_T4FD<CAN3, RX_SIZE_256, TX_SIZE_16> FD;
 
 TeensyCAN node36 = TeensyCAN(36);
 
+void cb(const uint8_t* buffer, uint16_t length, AsyncTC info) {
+  Serial.print("Node: ");
+  Serial.print(info.node);
+  Serial.print("\tPacketID: ");
+  Serial.print(info.packetid);
+  Serial.print("\tBroadcast: ");
+  Serial.print(info.broadcast);
+  Serial.print("\tData: ");
+  for ( uint8_t i = 0; i < length; i++ ) {
+    ::Serial.print(buffer[i]);
+    ::Serial.print(" ");
+  }::Serial.println();
+}
+
+void canSniff(const CANFD_message_t &msg) {
+  Serial.print("ISR - MB "); Serial.print(msg.mb);
+  Serial.print("  OVERRUN: "); Serial.print(msg.flags.overrun);
+  Serial.print("  LEN: "); Serial.print(msg.len);
+  Serial.print(" EXT: "); Serial.print(msg.flags.extended);
+  Serial.print("  EDL: "); Serial.print(msg.edl );
+  Serial.print(" TS: "); Serial.print(msg.timestamp);
+  Serial.print(" ID: "); Serial.print(msg.id, HEX);
+  Serial.print(" Buffer: ");
+  for ( uint8_t i = 0; i < msg.len; i++ ) {
+    Serial.print(msg.buf[i], HEX); Serial.print(" ");
+  } Serial.println();
+}
+
 void setup(void) {
   Serial.begin(115200); delay(400);
   pinMode(6, OUTPUT); digitalWrite(6, LOW);
@@ -26,37 +54,6 @@ void setup(void) {
   FD.enableMBInterrupts();
   FD.mailboxStatus();
 }
-
-void cb(const uint8_t* buffer, uint16_t length, AsyncTC info) {
-  Serial.print("Node: ");
-  Serial.print(info.node);
-  Serial.print("\tPacketID: ");
-  Serial.print(info.packetid);
-  Serial.print("\tBroadcast: ");
-  Serial.print(info.broadcast);
-  Serial.print("\tData: ");
-  for ( uint8_t i = 0; i < length; i++ ) {
-    ::Serial.print(buffer[i]);
-    ::Serial.print(" ");
-  }::Serial.println();
-}
-
-
-void canSniff(const CANFD_message_t &msg) {
-  Serial.print("ISR - MB "); Serial.print(msg.mb);
-  Serial.print("  OVERRUN: "); Serial.print(msg.flags.overrun);
-  Serial.print("  LEN: "); Serial.print(msg.len);
-  Serial.print(" EXT: "); Serial.print(msg.flags.extended);
-  Serial.print("  EDL: "); Serial.print(msg.edl );
-  Serial.print(" TS: "); Serial.print(msg.timestamp);
-  Serial.print(" ID: "); Serial.print(msg.id, HEX);
-  Serial.print(" Buffer: ");
-  for ( uint8_t i = 0; i < msg.len; i++ ) {
-    Serial.print(msg.buf[i], HEX); Serial.print(" ");
-  } Serial.println();
-}
-
-
 
 
 

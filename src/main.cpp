@@ -36,14 +36,14 @@ void setup() {
   config.sample = 87.5;
   FD.setRegions(64);
   FD.setBaudRate(config);
-  FD.onReceive(canSniff);
+  // FD.onReceive(canSniff);
   FD.enableMBInterrupts();
   FD.mailboxStatus();
 }
 
 void loop() {
-  FD.events();
-  Node.events();
+  // FD.events();
+  // Node.events();
   static uint32_t t = millis();
   if ( millis() - t > 1000 ) {
     uint8_t data[1024] = {
@@ -55,9 +55,9 @@ void loop() {
       51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
       61, 62, 63, 64, 65, 66, 67, 68, 69, 70
     };
-
-    Serial.println(    Node.sendMsg(data, 40, 5)); /* Global always returns 1, no response. */
-    Serial.println(node100.sendMsg(data, 40, 7)); /* ACK: 0x06, TIMEOUT = 0xFF */
+    Serial.println("Send Start");
+    // Serial.println(    Node.sendMsg(data, 40, 5)); /* Global always returns 1, no response. */
+    Serial.println(node100.sendMsg(data, 100, 7)); /* ACK: 0x06, TIMEOUT = 0xFF */
     t = millis();
   }
 }

@@ -1,9 +1,23 @@
 #include <FlexCAN_T4.h>
 #include <TeensyCAN.h>
 
-FlexCAN_T4FD<CAN3, RX_SIZE_256, TX_SIZE_256> FD;
+FlexCAN_T4FD<CAN3, RX_SIZE_256, TX_SIZE_16> FD;
 
-TeensyCAN node100 = TeensyCAN(100);
+TeensyCAN node36 = TeensyCAN(36);
+
+void cb(const uint8_t* buffer, uint16_t length, AsyncTC info) {
+  Serial.print("Node: ");
+  Serial.print(info.node);
+  Serial.print("\tPacketID: ");
+  Serial.print(info.packetid);
+  Serial.print("\tBroadcast: ");
+  Serial.print(info.broadcast);
+  Serial.print("\tData: ");
+  for ( uint8_t i = 0; i < length; i++ ) {
+    ::Serial.print(buffer[i]);
+    ::Serial.print(" ");
+  }::Serial.println();
+}
 
 void canSniff(const CANFD_message_t &msg) {
   Serial.print("ISR - MB "); Serial.print(msg.mb);
@@ -19,14 +33,14 @@ void canSniff(const CANFD_message_t &msg) {
   } Serial.println();
 }
 
-void setup() {
+void setup(void) {
   Serial.begin(115200); delay(400);
-  pinMode(6, OUTPUT); digitalWrite(6, LOW); /* enable transceiver */
-  FD.begin(); /* enable the FlexCAN controller before assigning it */
+  pinMode(6, OUTPUT); digitalWrite(6, LOW);
+  FD.begin();
+  Node.setID(100);
+  Node.setBus(_CAN3);
 
-  node100.setBus(_CAN3);
-  node100.setID(20);
-
+  Node.onReceive(cb);
   CANFD_timings_t config;
   config.clock = CLK_24MHz;
   config.baudrate = 1000000;
@@ -41,24 +55,26 @@ void setup() {
   FD.mailboxStatus();
 }
 
+
+
 void loop() {
   FD.events();
   Node.events();
-  static uint32_t t = millis();
-  if ( millis() - t > 1000 ) {
-    uint8_t data[1024] = {
-      1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-      11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-      21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-      31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-      41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
-      51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
-      61, 62, 63, 64, 65, 66, 67, 68, 69, 70
-    };
-
-    Serial.println(    Node.sendMsg(data, 40, 5)); /* Global always returns 1, no response. */
-    Serial.println(node100.sendMsg(data, 40, 7)); /* ACK: 0x06, TIMEOUT = 0xFF */
-    t = millis();
-  }
 }
 
+void canSniff20(const CAN_message_t &msg) { // global callback
+  Serial.print("T4: ");
+  Serial.print("MB "); Serial.print(msg.mb);
+  Serial.print(" OVERRUN: "); Serial.print(msg.flags.overrun);
+  Serial.print(" BUS "); Serial.print(msg.bus);
+  Serial.print(" LEN: "); Serial.print(msg.len);
+  Serial.print(" EXT: "); Serial.print(msg.flags.extended);
+  Serial.print(" REMOTE: "); Serial.print(msg.flags.remote);
+  Serial.print(" TS: "); Serial.print(msg.timestamp);
+  Serial.print(" ID: "); Serial.print(msg.id, HEX);
+  Serial.print(" IDHIT: "); Serial.print(msg.idhit);
+  Serial.print(" Buffer: ");
+  for ( uint8_t i = 0; i < msg.len; i++ ) {
+    Serial.print(msg.buf[i], HEX); Serial.print(" ");
+  } Serial.println();
+}

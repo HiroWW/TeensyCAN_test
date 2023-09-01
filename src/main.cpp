@@ -24,7 +24,8 @@ void cb(const uint8_t* buffer, uint16_t length, AsyncTC info) {
 
 
 void setup(void) {
-  Serial.begin(115200); delay(400);
+  Serial.begin(115200); delay(4000);
+  Serial.println("hello world!");
   pinMode(6, OUTPUT); digitalWrite(6, LOW);
   FD.begin();
   Node.setID(100);
